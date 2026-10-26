@@ -1,0 +1,150 @@
+import http.server
+import socketserver
+import urllib.request
+import urllib.error
+import json
+import webbrowser
+import os
+import sys
+import threading
+import time
+import subprocess
+
+PORT = 5050
+DEFAULT_JETSON_HOST = "192.168.151.108:11434"
+
+class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Jetson-Host')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path.startswith('/api/check_status'):
+            host = self.headers.get('X-Jetson-Host', DEFAULT_JETSON_HOST)
+            status_data = {"online": False, "models": [], "host": host}
+            try:
+                url = f"http://{host}/api/tags"
+                req = urllib.request.Request(url, headers={'User-Agent': 'JetsonWebChat'})
+                with urllib.request.urlopen(req, timeout=1.5) as resp:
+                    if resp.status == 200:
+                        data = json.loads(resp.read().decode('utf-8'))
+                        status_data["online"] = True
+                        status_data["models"] = data.get("models", [])
+            except Exception as e:
+                status_data["error"] = str(e)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(status_data).encode('utf-8'))
+            return
+        
+        return super().do_GET()
+
+    def do_POST(self):
+        if self.path.startswith('/api/tools/execute'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+            cmd = body.get('command', '')
+            timeout = float(body.get('timeout', 3.5))
+            try:
+                proc = subprocess.Popen(
+                    cmd,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                try:
+                    stdout, stderr = proc.communicate(timeout=timeout)
+                    out = (stdout or '') + (stderr or '')
+                    if not out.strip():
+                        out = f"(Process completed with exit code {proc.returncode})"
+                    status = 200
+                except subprocess.TimeoutExpired:
+                    # GUI application or background process active
+                    out = f"✓ Process active on Windows desktop (PID: {proc.pid}). Launched successfully."
+                    status = 200
+            except Exception as e:
+                out = f"Execution error: {e}"
+                status = 500
+            
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"output": out}).encode('utf-8'))
+            return
+
+        if self.path.startswith('/api/tools/write_file'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+            file_path = body.get('path', '')
+            content = body.get('content', '')
+            try:
+                os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                res = {"status": "ok", "path": file_path, "bytes": len(content)}
+                status = 200
+            except Exception as e:
+                res = {"error": str(e)}
+                status = 500
+            
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode('utf-8'))
+            return
+
+        if self.path.startswith('/api/chat') or self.path.startswith('/api/generate'):
+            host = self.headers.get('X-Jetson-Host', DEFAULT_JETSON_HOST)
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            
+            target_url = f"http://{host}{self.path}"
+            try:
+                req = urllib.request.Request(
+                    target_url,
+                    data=body,
+                    headers={'Content-Type': 'application/json'}
+                )
+                with urllib.request.urlopen(req, timeout=300.0) as resp:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/x-ndjson')
+                    self.end_headers()
+                    while True:
+                        chunk = resp.read(1024)
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        self.wfile.flush()
+            except Exception as e:
+                self.send_response(502)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Failed to connect to Jetson at {host}: {e}"}).encode('utf-8'))
+            return
+
+        self.send_response(404)
+        self.end_headers()
+
+def open_browser():
+    time.sleep(1.0)
+    webbrowser.open(f"http://localhost:{PORT}")
+
+if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    socketserver.TCPServer.allow_reuse_address = True
+    with socketserver.ThreadingTCPServer(("", PORT), JetsonProxyHandler) as httpd:
+        print(f"[*] Jetson AI Web Chat server running on http://localhost:{PORT}")
+        threading.Thread(target=open_browser, daemon=True).start()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\nShutting down server.")

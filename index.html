@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jetson Orin AI Studio - Autonomous Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: rgba(18, 24, 38, 0.7);
+      --bg-card-border: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-violet: #7b2ff7;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --code-bg: #07090e;
+      --border-radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #0d1322 0%, #080a10 90%);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--bg-card-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Connection Card */
+    .status-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      transition: all 0.3s;
+    }
+
+    .status-badge.online {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .host-input-wrap {
+      display: flex;
+      gap: 6px;
+    }
+
+    .host-input-wrap input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 6px 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+    }
+
+    .host-input-wrap button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .host-input-wrap button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Section Headers */
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Model Select */
+    .model-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .model-option {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .model-option.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(123, 47, 247, 0.1));
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+    }
+
+    .model-name {
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .model-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-cyan);
+      font-family: 'Fira Code', monospace;
+    }
+
+    .model-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Tool Calling Switch */
+    .toggle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-info h4 {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-info p {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+      background-color: #000;
+    }
+
+    /* Main Chat Container */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      height: 100vh;
+      background: transparent;
+    }
+
+    .chat-header {
+      padding: 16px 30px;
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 13, 20, 0.6);
+      z-index: 5;
+    }
+
+    .active-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .active-model-title {
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .active-stats {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions button {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .header-actions button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    /* Messages Area */
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+      margin: auto;
+      max-width: 680px;
+      text-align: center;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .welcome-icon {
+      font-size: 48px;
+      filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.4));
+    }
+
+    .welcome-card h2 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 500px;
+    }
+
+    .prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .prompt-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 12px;
+      color: var(--text-main);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+
+    .prompt-chip:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 242, 254, 0.05);
+      transform: translateY(-2px);
+    }
+
+    /* Chat Messages */
+    .message-row {
+      display: flex;
+      gap: 14px;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .message-row.user {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .message-row.assistant .avatar {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      color: #000;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    }
+
+    .message-row.user .avatar {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: calc(100% - 60px);
+      word-break: break-word;
+    }
+
+    .message-row.user .bubble {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(79, 172, 254, 0.15));
+      border-color: rgba(0, 242, 254, 0.3);
+    }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      position: relative;
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* High-Tech Tool Call Card */
+    .tool-call-card {
+      background: rgba(14, 20, 34, 0.95);
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      border-radius: 12px;
+      margin: 14px 0;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+      transition: all 0.3s;
+    }
+
+    .tool-call-header {
+      background: linear-gradient(90deg, rgba(0, 242, 254, 0.18), rgba(123, 47, 247, 0.18));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tool-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .tool-icon {
+      color: var(--accent-cyan);
+      font-size: 14px;
+    }
+
+    .tool-name {
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .tool-status-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .tool-status-badge.running {
+      background: rgba(0, 242, 254, 0.15);
+      color: var(--accent-cyan);
+      border-color: rgba(0, 242, 254, 0.4);
+      animation: pulse 1.5s infinite;
+    }
+
+    .tool-status-badge.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .tool-status-badge.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .tool-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tool-copy-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+    }
+
+    .tool-run-btn {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border: none;
+      color: #000;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .tool-run-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.5);
+    }
+
+    .tool-run-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tool-call-body {
+      padding: 12px 14px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e2e8f0;
+      background: rgba(0, 0, 0, 0.4);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .tool-output-panel {
+      padding: 10px 14px;
+      background: #05070a;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .output-header {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .output-content {
+      color: #10b981;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    /* Input Footer */
+    .chat-footer {
+      padding: 20px 30px 24px;
+      background: linear-gradient(to top, #0a0d14 70%, transparent);
+    }
+
+    .input-container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: rgba(18, 24, 38, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s;
+    }
+
+    .input-container:focus-within {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+    }
+
+    .input-container textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      max-height: 180px;
+      min-height: 24px;
+      line-height: 1.5;
+      padding: 4px 0;
+    }
+
+    .send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border: none;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">&#x26A1;</div>
+      <div class="brand-text">
+        <h1>Orin AI Studio</h1>
+        <span>Jetson Orin Nano Edge</span>
+      </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="status-card">
+      <div class="status-header">
+        <span>BOARD CONNECTION</span>
+        <div id="statusBadge" class="status-badge">
+          <div class="status-dot"></div>
+          <span id="statusText">Scanning...</span>
+        </div>
+      </div>
+      <div class="host-input-wrap">
+        <input type="text" id="jetsonHost" value="192.168.151.108:11434" placeholder="Host:Port">
+        <button id="reconnectBtn" onclick="checkStatus()">Connect</button>
+      </div>
+    </div>
+
+    <!-- Models -->
+    <div class="section-label">Active Model</div>
+    <div class="model-selector">
+      <div class="model-option active" data-model="qwen2.5-coder:1.5b">
+        <div class="model-name">
+          <span>Qwen 2.5 Coder 1.5B</span>
+          <span class="model-badge">Ultra-Fast 37 tok/s</span>
+        </div>
+        <div class="model-desc">Edge-optimized, zero thermal throttling, full Autonomous Tool Calling & Windows integration.</div>
+      </div>
+    </div>
+
+    <!-- Agent Mode / Tool Calling -->
+    <div class="toggle-card">
+      <div class="toggle-info">
+        <h4>&#x26A1; Autonomous Agent Mode</h4>
+        <p>Auto-executes commands, popups & scripts on Windows</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toolCallingToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="chat-container">
+    <header class="chat-header">
+      <div class="active-info">
+        <div class="active-model-title" id="currentModelLabel">&#x26A1; Qwen 2.5 Coder 1.5B (Autonomous Agent)</div>
+        <div class="active-stats">NVIDIA Ampere GPU | Windows Tool Execution Active</div>
+      </div>
+      <div class="header-actions">
+        <button onclick="clearChat()">Clear Chat</button>
+      </div>
+    </header>
+
+    <div class="messages-area" id="messagesArea">
+      <!-- Welcome Screen -->
+      <div class="welcome-card" id="welcomeCard">
+        <div class="welcome-icon">&#x1F916;</div>
+        <h2>Jetson Orin Nano AI Studio</h2>
+        <p>Chat, code, and autonomously execute Windows commands, popups, and scripts powered by your Jetson Orin Nano hardware.</p>
+        
+        <div class="prompts-grid">
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "create a running app that shows popup in windows heellloooo worlklld"
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "run a python program that shows Hello baby popup"
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "check my network configuration with ipconfig"
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "write a python script to calculate the first 20 fibonacci numbers"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="chat-footer">
+      <div class="input-container">
+        <textarea id="promptInput" placeholder="Ask anything, write code, or execute tools..." rows="1" onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#x27A4;</button>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    let activeModel = "qwen2.5-coder:1.5b";
+    let isGenerating = false;
+    let chatHistory = [];
+
+    function usePrompt(text) {
+      document.getElementById('promptInput').value = text.replace(/^"|"$/g, '');
+      sendMessage();
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    async function checkStatus() {
+      const savedHost = localStorage.getItem('jetsonHost');
+      if (savedHost && !document.getElementById('jetsonHost').dataset.init) {
+        document.getElementById('jetsonHost').value = savedHost;
+        document.getElementById('jetsonHost').dataset.init = "true";
+      }
+      const host = document.getElementById('jetsonHost').value.trim();
+      localStorage.setItem('jetsonHost', host);
+
+      const badge = document.getElementById('statusBadge');
+      const text = document.getElementById('statusText');
+      badge.className = 'status-badge';
+      text.innerText = "Checking...";
+
+      try {
+        const res = await fetch('/api/check_status', {
+          headers: { 'X-Jetson-Host': host }
+        });
+        const data = await res.json();
+        if (data.online) {
+          badge.className = 'status-badge online';
+          text.innerText = "Online";
+        } else {
+          badge.className = 'status-badge';
+          text.innerText = "Offline";
+        }
+      } catch (err) {
+        badge.className = 'status-badge';
+        text.innerText = "Offline";
+      }
+    }
+
+    function clearChat() {
+      chatHistory = [];
+      const messagesArea = document.getElementById('messagesArea');
+      messagesArea.innerHTML = `
+        <div class="welcome-card" id="welcomeCard">
+          <div class="welcome-icon">&#x1F916;</div>
+          <h2>Jetson Orin Nano AI Studio</h2>
+          <p>Chat, code, and autonomously execute Windows commands, popups, and scripts powered by your Jetson Orin Nano hardware.</p>
+          <div class="prompts-grid">
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "create a running app that shows popup in windows heellloooo worlklld"
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "run a python program that shows Hello baby popup"
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "check my network configuration with ipconfig"
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "write a python script to calculate the first 20 fibonacci numbers"
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      return (text || '')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function parseCommandFromBlock(raw) {
+      let trimmed = raw.trim();
+      // 1. Try standard JSON parse
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (parsed.command) return parsed.command;
+        if (parsed.arguments && parsed.arguments.command) return parsed.arguments.command;
+        if (parsed.parameters && parsed.parameters.command) return parsed.parameters.command;
+        if (parsed.cmd) return parsed.cmd;
+      } catch (e) {}
+
+      // 2. Try regex extraction of unescaped quotes in JSON string
+      const matchCmd = trimmed.match(/"command"\s*:\s*"([\s\S]+)"\s*\}?$/);
+      if (matchCmd) {
+        return matchCmd[1].trim();
+      }
+
+      const matchAny = trimmed.match(/"command"\s*:\s*"([\s\S]*?)"(?:\s*,\s*"|\s*\}|\s*$)/);
+      if (matchAny) {
+        return matchAny[1].trim();
+      }
+
+      // 3. If raw command string inside tool block
+      if (!trimmed.startsWith('{')) {
+        return trimmed;
+      }
+      return "";
+    }
+
+    function buildToolCardHtml(cmd, toolName) {
+      const escapedCmd = escapeHtml(cmd);
+      const encodedCmd = encodeURIComponent(cmd);
+      const isAuto = document.getElementById('toolCallingToggle').checked;
+      const initialBadge = isAuto ? 'Auto-Running...' : 'Ready';
+      const badgeClass = isAuto ? 'tool-status-badge running' : 'tool-status-badge';
+
+      return `<div class="tool-call-card" data-cmd="${encodedCmd}">
+        <div class="tool-call-header">
+          <div class="tool-title-wrap">
+            <span class="tool-icon">&#x26A1;</span>
+            <span class="tool-name">${escapeHtml(toolName || 'execute_command')}</span>
+            <span class="${badgeClass}">${initialBadge}</span>
+          </div>
+          <div class="tool-actions">
+            <button class="tool-copy-btn" onclick="copyToolCommand(this)">Copy</button>
+            <button class="tool-run-btn" onclick="executeToolCommand(this, decodeURIComponent('${encodedCmd}'))">&#x25B6; Run</button>
+          </div>
+        </div>
+        <div class="tool-call-body"><code>${escapedCmd}</code></div>
+        <div class="tool-output-panel" style="display:none;">
+          <div class="output-header">&#x25B8; OUTPUT CONSOLE</div>
+          <div class="output-content"></div>
+        </div>
+      </div>`;
+    }
+
+    function formatMarkdown(text) {
+      // 1. Tool Call Blocks (```tool ... ```)
+      text = text.replace(/```(?:tool|tool_call|execute_command)\s*[\r\n]+([\s\S]*?)[\r\n]+```/gi, (match, inner) => {
+        const cmd = parseCommandFromBlock(inner);
+        if (cmd) {
+          return buildToolCardHtml(cmd, 'execute_command');
+        }
+        return `<pre><code>${escapeHtml(inner)}</code></pre>`;
+      });
+
+      // 2. JSON Tool Call Blocks (```json {"tool": "execute_command", ...} ```)
+      text = text.replace(/```(?:json)?\s*[\r\n]+(\{\s*"(?:tool|name)"\s*:\s*"(?:execute_command|command)"[\s\S]*?\})[\r\n]+```/gi, (match, inner) => {
+        const cmd = parseCommandFromBlock(inner);
+        if (cmd) {
+          return buildToolCardHtml(cmd, 'execute_command');
+        }
+        return `<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>${escapeHtml(inner)}</code></pre>`;
+      });
+
+      // 3. Explicit TOOL_CALL headers
+      text = text.replace(/TOOL_CALL:\s*execute_command\s*```(?:powershell|cmd|bash|sh|python)?\s*[\r\n]+([\s\S]*?)[\r\n]+```/gi, (match, cmd) => {
+        return buildToolCardHtml(cmd.trim(), 'execute_command');
+      });
+
+      // 4. Regular Code blocks
+      text = text.replace(/```([a-zA-Z0-9_-]*)[\r\n]+([\s\S]*?)```/g, (match, lang, code) => {
+        return `<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>${escapeHtml(code)}</code></pre>`;
+      });
+
+      // 5. Inline formatting
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+      text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\n/g, '<br>');
+      return text;
+    }
+
+    async function executeToolCommand(btn, cmd) {
+      const card = btn.closest('.tool-call-card');
+      if (!card) return;
+
+      const badge = card.querySelector('.tool-status-badge');
+      const outPanel = card.querySelector('.tool-output-panel');
+      const outContent = card.querySelector('.output-content');
+
+      btn.disabled = true;
+      btn.innerHTML = "&#x23F3; Running...";
+      if (badge) {
+        badge.className = 'tool-status-badge running';
+        badge.innerText = 'Executing...';
+      }
+
+      outPanel.style.display = 'block';
+      outContent.innerText = "Executing on Windows host...";
+
+      const t0 = performance.now();
+      try {
+        const res = await fetch('/api/tools/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd, timeout: 3.5 })
+        });
+        const data = await res.json();
+        const duration = ((performance.now() - t0) / 1000).toFixed(2);
+
+        outContent.innerText = data.output || "(Command completed with no output)";
+        if (badge) {
+          badge.className = 'tool-status-badge success';
+          badge.innerText = `\u2713 Executed (${duration}s)`;
+        }
+        btn.innerHTML = "&#x21BB; Re-Run";
+        btn.disabled = false;
+        card.dataset.executed = "true";
+      } catch (err) {
+        outContent.innerText = "Error executing command: " + err.message;
+        if (badge) {
+          badge.className = 'tool-status-badge error';
+          badge.innerText = "&#x26A0; Failed";
+        }
+        btn.innerHTML = "&#x21BB; Retry";
+        btn.disabled = false;
+      }
+    }
+
+    function copyToolCommand(btn) {
+      const card = btn.closest('.tool-call-card');
+      const code = card.querySelector('.tool-call-body code').innerText;
+      navigator.clipboard.writeText(code);
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = "Copy", 1500);
+    }
+
+    function copyCode(btn) {
+      const code = btn.nextElementSibling.innerText;
+      navigator.clipboard.writeText(code);
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = "Copy", 1500);
+    }
+
+    function appendMessage(role, text) {
+      const welcome = document.getElementById('welcomeCard');
+      if (welcome) welcome.remove();
+
+      const messagesArea = document.getElementById('messagesArea');
+      const row = document.createElement('div');
+      row.className = `message-row ${role}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.innerText = role === 'user' ? 'U' : 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = formatMarkdown(text);
+
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      messagesArea.appendChild(row);
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+      return bubble;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('promptInput');
+      const text = input.value.trim();
+      if (!text || isGenerating) return;
+
+      input.value = '';
+      input.style.height = 'auto';
+      isGenerating = true;
+      document.getElementById('sendBtn').disabled = true;
+
+      appendMessage('user', text);
+      chatHistory.push({ role: 'user', content: text });
+
+      const assistantBubble = appendMessage('assistant', '<span class="cursor">Thinking...</span>');
+
+      const toolsEnabled = document.getElementById('toolCallingToggle').checked;
+      const host = document.getElementById('jetsonHost').value.trim();
+
+      const systemPrompt = `You are the AI Assistant for NVIDIA Jetson Orin Nano connected to a Windows host PC.
+You are equipped with autonomous execution tools on the Windows PC.
+
+MODES OF OPERATION:
+1. CONVERSATION & Q&A:
+   - For greetings, chit-chat, math questions, explanations, or code questions: reply with natural, helpful markdown.
+   - Do NOT invoke tools for simple questions like "hi", "2+3", or "explain quicksort".
+
+2. CODE GENERATION ONLY:
+   - When asked "write code" or "show me how to...", output standard markdown code blocks (e.g. \`\`\`python ... \`\`\`).
+
+3. TOOL EXECUTION (RUN / CREATE / LAUNCH / TEST):
+   - When the user asks to "run", "execute", "launch", "create a running app", "show a popup", "open", "test", or says "do it / run it":
+   - You MUST generate a tool call using the following exact block:
+\`\`\`tool
+{"tool": "execute_command", "command": "<command to execute in PowerShell or cmd>"}
+\`\`\`
+   - Provide a brief 1-sentence note to the user explaining what you are executing.
+
+EXAMPLES:
+User: hi
+Assistant: Hello! I am your Jetson Orin Nano AI assistant. How can I help you today?
+
+User: what is 2 + 3?
+Assistant: 2 + 3 is 5.
+
+User: create a running app that shows popup in windows heellloooo worlklld
+Assistant: Launching the popup window on your desktop now:
+\`\`\`tool
+{"tool": "execute_command", "command": "powershell -Command \\"Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('heellloooo worlklld', 'Jetson Orin Nano')\\""}
+\`\`\`
+
+User: run a python program that shows Hello baby popup
+Assistant: Running the Python popup on your Windows desktop:
+\`\`\`tool
+{"tool": "execute_command", "command": "python -c \\"import tkinter as tk, tkinter.messagebox as mb; root=tk.Tk(); root.withdraw(); mb.showinfo('Hello', 'Hello baby')\\""}
+\`\`\`
+
+User: check my ip address
+Assistant: Checking your IP configuration:
+\`\`\`tool
+{"tool": "execute_command", "command": "ipconfig"}
+\`\`\``;
+
+      const payload = {
+        model: activeModel,
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...chatHistory
+        ],
+        stream: true,
+        options: { temperature: 0.1 }
+      };
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Jetson-Host': host
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to connect to model on ${host}`);
+        }
+
+        assistantBubble.innerHTML = '';
+        let fullResponse = '';
+        let streamBuffer = '';
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          streamBuffer += decoder.decode(value, { stream: true });
+          const lines = streamBuffer.split('\n');
+          streamBuffer = lines.pop(); // Keep unfinished partial line in buffer
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const json = JSON.parse(trimmed);
+              if (json.message && json.message.content) {
+                fullResponse += json.message.content;
+                assistantBubble.innerHTML = formatMarkdown(fullResponse);
+                document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
+              }
+            } catch (e) {}
+          }
+        }
+
+        // Flush any trailing line
+        if (streamBuffer && streamBuffer.trim()) {
+          try {
+            const json = JSON.parse(streamBuffer.trim());
+            if (json.message && json.message.content) {
+              fullResponse += json.message.content;
+              assistantBubble.innerHTML = formatMarkdown(fullResponse);
+            }
+          } catch (e) {}
+        }
+
+        if (!fullResponse.trim()) {
+          assistantBubble.innerHTML = "(No response received from model. Please try again.)";
+        } else {
+          chatHistory.push({ role: 'assistant', content: fullResponse });
+          if (chatHistory.length > 8) {
+            chatHistory = chatHistory.slice(-8); // Prevent repetition memory loops
+          }
+
+          // Autonomous Agent Execution: Auto-run any pending tool cards!
+          if (toolsEnabled) {
+            const pendingCards = assistantBubble.querySelectorAll('.tool-call-card:not([data-executed])');
+            for (const card of pendingCards) {
+              const btn = card.querySelector('.tool-run-btn');
+              const cmd = decodeURIComponent(card.dataset.cmd || '');
+              if (btn && cmd) {
+                await executeToolCommand(btn, cmd);
+              }
+            }
+          }
+        }
+
+      } catch (err) {
+        assistantBubble.innerHTML = `<span style="color: #ef4444;">&#x26A0; Error: ${err.message}.<br><br>Make sure the Jetson is plugged into the network and powered on.</span>`;
+      } finally {
+        isGenerating = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+      }
+    }
+
+    // Auto-expand textarea
+    const promptInput = document.getElementById('promptInput');
+    promptInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+    });
+
+    // Check status on start and every 6 seconds
+    checkStatus();
+    setInterval(checkStatus, 6000);
+  </script>
+</body>
+</html>
