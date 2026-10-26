@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jetson Orin AI Studio - Autonomous Agent</title>
+  <title>Jetson Orin AI Studio - Graft Code Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -661,6 +661,65 @@
       line-height: 1.5;
     }
 
+    
+    /* Graft Codebase Toolbar */
+    .graft-toolbar {
+      max-width: 860px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .graft-toolbar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .graft-chip {
+      background: rgba(18, 24, 38, 0.85);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .graft-chip:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    }
+
+    .repo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(79, 172, 254, 0.12);
+      border: 1px solid rgba(79, 172, 254, 0.3);
+      color: var(--accent-blue);
+      font-size: 11px;
+      font-family: 'Fira Code', monospace;
+    }
+
     /* Input Footer */
     .chat-footer {
       padding: 20px 30px 24px;
@@ -759,12 +818,26 @@
     <!-- Models -->
     <div class="section-label">Active Model</div>
     <div class="model-selector">
-      <div class="model-option active" data-model="qwen2.5-coder:1.5b">
+      <div class="model-option active" data-model="qwen-coder-uncensored:1.5b" onclick="selectModel('qwen-coder-uncensored:1.5b', this)">
+        <div class="model-name">
+          <span>Qwen Coder Uncensored 1.5B</span>
+          <span class="model-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">&#x26A1; Uncensored</span>
+        </div>
+        <div class="model-desc">Uncensored, zero-refusal coding intelligence on Orin Nano with full Graft tool calling.</div>
+      </div>
+      <div class="model-option" data-model="qwen2.5-coder:1.5b" onclick="selectModel('qwen2.5-coder:1.5b', this)">
         <div class="model-name">
           <span>Qwen 2.5 Coder 1.5B</span>
-          <span class="model-badge">Ultra-Fast 37 tok/s</span>
+          <span class="model-badge">Standard Base</span>
         </div>
-        <div class="model-desc">Edge-optimized, zero thermal throttling, full Autonomous Tool Calling & Windows integration.</div>
+        <div class="model-desc">Official Alibaba Cloud base model.</div>
+      </div>
+      <div class="model-option" data-model="qwen2.5-coder:7b" onclick="selectModel('qwen2.5-coder:7b', this)">
+        <div class="model-name">
+          <span>Qwen 2.5 Coder 7B</span>
+          <span class="model-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">Heavy (7B)</span>
+        </div>
+        <div class="model-desc">High parameter model. May trigger power brownout if GPU runs at full context.</div>
       </div>
     </div>
 
@@ -785,7 +858,7 @@
   <main class="chat-container">
     <header class="chat-header">
       <div class="active-info">
-        <div class="active-model-title" id="currentModelLabel">&#x26A1; Qwen 2.5 Coder 1.5B (Autonomous Agent)</div>
+        <div class="active-model-title" id="currentModelLabel">&#x26A1; qwen-coder-uncensored:1.5b (Autonomous Agent)</div>
         <div class="active-stats">NVIDIA Ampere GPU | Windows Tool Execution Active</div>
       </div>
       <div class="header-actions">
@@ -803,16 +876,16 @@
         
         <div class="prompts-grid">
           <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "graft ask \"Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps.\" --source --in app/"
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "graft blast --base mr-935~2"
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+            "graft search \"UploadTask\""
+          </div>
+          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
             "create a running app that shows popup in windows heellloooo worlklld"
-          </div>
-          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "run a python program that shows Hello baby popup"
-          </div>
-          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "check my network configuration with ipconfig"
-          </div>
-          <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "write a python script to calculate the first 20 fibonacci numbers"
           </div>
         </div>
       </div>
@@ -827,9 +900,28 @@
   </main>
 
   <script>
-    let activeModel = "qwen2.5-coder:1.5b";
+    let activeModel = "qwen-coder-uncensored:1.5b";
+
+    function selectModel(model, el) {
+      activeModel = model;
+      document.querySelectorAll(".model-option").forEach(opt => opt.classList.remove("active"));
+      if (el) el.classList.add("active");
+      document.getElementById("currentModelLabel").innerText = `⚡ ${model} (Autonomous Agent)`;
+    }
     let isGenerating = false;
     let chatHistory = [];
+
+    function quickGraft(action) {
+      const input = document.getElementById('promptInput');
+      if (action === 'trace_upload') {
+        input.value = 'graft ask "Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps." --source --in app/';
+      } else if (action === 'blast_mr935') {
+        input.value = 'graft blast --base mr-935~2';
+      } else if (action === 'search_task') {
+        input.value = 'graft search "UploadTask"';
+      }
+      sendMessage();
+    }
 
     function usePrompt(text) {
       document.getElementById('promptInput').value = text.replace(/^"|"$/g, '');
@@ -862,123 +954,116 @@
           headers: { 'X-Jetson-Host': host }
         });
         const data = await res.json();
+
         if (data.online) {
           badge.className = 'status-badge online';
-          text.innerText = "Online";
+          text.innerText = "Connected";
         } else {
           badge.className = 'status-badge';
           text.innerText = "Offline";
         }
-      } catch (err) {
+      } catch (e) {
         badge.className = 'status-badge';
-        text.innerText = "Offline";
+        text.innerText = "Unreachable";
       }
     }
 
     function clearChat() {
       chatHistory = [];
-      const messagesArea = document.getElementById('messagesArea');
-      messagesArea.innerHTML = `
+      document.getElementById('messagesArea').innerHTML = `
         <div class="welcome-card" id="welcomeCard">
-          <div class="welcome-icon">&#x1F916;</div>
-          <h2>Jetson Orin Nano AI Studio</h2>
-          <p>Chat, code, and autonomously execute Windows commands, popups, and scripts powered by your Jetson Orin Nano hardware.</p>
+          <div class="welcome-icon">&#x26A1;</div>
+          <h2>Jetson Orin Nano AI Studio &amp; Graft Intelligence</h2>
+          <p>Autonomous AI coding agent with deep codebase knowledge graph (Pilot: 11,346 nodes). Query Graft, trace merge requests, and execute commands.</p>
           <div class="prompts-grid">
             <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "graft ask \\"Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps.\\" --source --in app/"
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "graft blast --base mr-935~2"
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
+              "graft search \\"UploadTask\\""
+            </div>
+            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
               "create a running app that shows popup in windows heellloooo worlklld"
-            </div>
-            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "run a python program that shows Hello baby popup"
-            </div>
-            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "check my network configuration with ipconfig"
-            </div>
-            <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "write a python script to calculate the first 20 fibonacci numbers"
             </div>
           </div>
         </div>
       `;
     }
 
-    function escapeHtml(text) {
-      return (text || '')
+    function escapeHtml(unsafe) {
+      return unsafe
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
-    function parseCommandFromBlock(raw) {
-      let trimmed = raw.trim();
-      // 1. Try standard JSON parse
-      try {
-        const parsed = JSON.parse(trimmed);
-        if (parsed.command) return parsed.command;
-        if (parsed.arguments && parsed.arguments.command) return parsed.arguments.command;
-        if (parsed.parameters && parsed.parameters.command) return parsed.parameters.command;
-        if (parsed.cmd) return parsed.cmd;
-      } catch (e) {}
-
-      // 2. Try regex extraction of unescaped quotes in JSON string
-      const matchCmd = trimmed.match(/"command"\s*:\s*"([\s\S]+)"\s*\}?$/);
-      if (matchCmd) {
-        return matchCmd[1].trim();
-      }
-
-      const matchAny = trimmed.match(/"command"\s*:\s*"([\s\S]*?)"(?:\s*,\s*"|\s*\}|\s*$)/);
-      if (matchAny) {
-        return matchAny[1].trim();
-      }
-
-      // 3. If raw command string inside tool block
-      if (!trimmed.startsWith('{')) {
-        return trimmed;
-      }
-      return "";
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function buildToolCardHtml(cmd, toolName) {
-      const escapedCmd = escapeHtml(cmd);
-      const encodedCmd = encodeURIComponent(cmd);
-      const isAuto = document.getElementById('toolCallingToggle').checked;
-      const initialBadge = isAuto ? 'Auto-Running...' : 'Ready';
-      const badgeClass = isAuto ? 'tool-status-badge running' : 'tool-status-badge';
-
-      return `<div class="tool-call-card" data-cmd="${encodedCmd}">
-        <div class="tool-call-header">
-          <div class="tool-title-wrap">
-            <span class="tool-icon">&#x26A1;</span>
-            <span class="tool-name">${escapeHtml(toolName || 'execute_command')}</span>
-            <span class="${badgeClass}">${initialBadge}</span>
+      const isGraft = cmd.trim().startsWith('graft');
+      const title = isGraft ? '⚡ graft graph intelligence' : (toolName || 'execute_command');
+      return `
+        <div class="tool-call-card" data-cmd="${encodeURIComponent(cmd)}">
+          <div class="tool-call-header">
+            <div class="tool-title-wrap">
+              <span class="tool-icon">&#x26A1;</span>
+              <span class="tool-name">${escapeHtml(title)}</span>
+            </div>
+            <div class="tool-actions">
+              <span class="tool-status-badge">&#x23F3; Ready</span>
+              <button class="tool-copy-btn" onclick="copyToolCommand(this)">Copy</button>
+              <button class="tool-run-btn" onclick="executeToolCommand(this, decodeURIComponent('${encodeURIComponent(cmd)}'), true)">&#x25B6; Run</button>
+            </div>
           </div>
-          <div class="tool-actions">
-            <button class="tool-copy-btn" onclick="copyToolCommand(this)">Copy</button>
-            <button class="tool-run-btn" onclick="executeToolCommand(this, decodeURIComponent('${encodedCmd}'))">&#x25B6; Run</button>
+          <div class="tool-call-body">
+            <code>${escapeHtml(cmd)}</code>
+          </div>
+          <div class="tool-output-panel" style="display:none;">
+            <div class="output-header">&#x25B8; OUTPUT CONSOLE</div>
+            <pre class="output-content"></pre>
           </div>
         </div>
-        <div class="tool-call-body"><code>${escapedCmd}</code></div>
-        <div class="tool-output-panel" style="display:none;">
-          <div class="output-header">&#x25B8; OUTPUT CONSOLE</div>
-          <div class="output-content"></div>
-        </div>
-      </div>`;
+      `;
     }
 
     function formatMarkdown(text) {
-      // 1. Tool Call Blocks (```tool ... ```)
-      text = text.replace(/```(?:tool|tool_call|execute_command)\s*[\r\n]+([\s\S]*?)[\r\n]+```/gi, (match, inner) => {
-        const cmd = parseCommandFromBlock(inner);
-        if (cmd) {
-          return buildToolCardHtml(cmd, 'execute_command');
+      if (!text) return '';
+
+      // 1. Tool blocks ```tool ... ```
+      text = text.replace(/```tool[\r\n]+([\s\S]*?)```/gi, (match, inner) => {
+        try {
+          const json = JSON.parse(inner.trim());
+          if (json.tool === 'execute_command' && json.command) {
+            return buildToolCardHtml(json.command, json.tool);
+          }
+          if (json.command) {
+            return buildToolCardHtml(json.command, json.tool || 'execute_command');
+          }
+        } catch (e) {
+          const cmdMatch = inner.match(/"command"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
+          if (cmdMatch) {
+            const cmd = cmdMatch[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            return buildToolCardHtml(cmd, 'execute_command');
+          }
         }
         return `<pre><code>${escapeHtml(inner)}</code></pre>`;
       });
 
-      // 2. JSON Tool Call Blocks (```json {"tool": "execute_command", ...} ```)
-      text = text.replace(/```(?:json)?\s*[\r\n]+(\{\s*"(?:tool|name)"\s*:\s*"(?:execute_command|command)"[\s\S]*?\})[\r\n]+```/gi, (match, inner) => {
-        const cmd = parseCommandFromBlock(inner);
-        if (cmd) {
-          return buildToolCardHtml(cmd, 'execute_command');
+      // 2. Fallback JSON tool execution blocks
+      text = text.replace(/```(?:json)?[\r\n]+(\{\s*"tool"\s*:\s*"execute_command"[\s\S]*?\})[\r\n]+```/gi, (match, inner) => {
+        try {
+          const json = JSON.parse(inner.trim());
+          if (json.command) {
+            return buildToolCardHtml(json.command, 'execute_command');
+          }
+        } catch (e) {
+          const cmdMatch = inner.match(/"command"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
+          if (cmdMatch) {
+            return buildToolCardHtml(cmdMatch[1].replace(/\\"/g, '"'), 'execute_command');
+          }
         }
         return `<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>${escapeHtml(inner)}</code></pre>`;
       });
@@ -1000,7 +1085,7 @@
       return text;
     }
 
-    async function executeToolCommand(btn, cmd) {
+    async function executeToolCommand(btn, cmd, isManual = false) {
       const card = btn.closest('.tool-call-card');
       if (!card) return;
 
@@ -1016,19 +1101,20 @@
       }
 
       outPanel.style.display = 'block';
-      outContent.innerText = "Executing on Windows host...";
+      outContent.innerText = "Executing in repository worktree...";
 
       const t0 = performance.now();
       try {
         const res = await fetch('/api/tools/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command: cmd, timeout: 3.5 })
+          body: JSON.stringify({ command: cmd, timeout: 45.0 })
         });
         const data = await res.json();
         const duration = ((performance.now() - t0) / 1000).toFixed(2);
 
-        outContent.innerText = data.output || "(Command completed with no output)";
+        const outText = data.output || "(Command completed with no output)";
+        outContent.innerText = outText;
         if (badge) {
           badge.className = 'tool-status-badge success';
           badge.innerText = `\u2713 Executed (${duration}s)`;
@@ -1036,6 +1122,14 @@
         btn.innerHTML = "&#x21BB; Re-Run";
         btn.disabled = false;
         card.dataset.executed = "true";
+
+        // AUTONOMOUS AGENT REACT LOOP: Trigger agent synthesis if tools enabled
+        const toolsEnabled = document.getElementById('toolCallingToggle').checked;
+        if (toolsEnabled && !card.dataset.synthesized) {
+          card.dataset.synthesized = "true";
+          await triggerAgentSynthesis(cmd, outText);
+        }
+
       } catch (err) {
         outContent.innerText = "Error executing command: " + err.message;
         if (badge) {
@@ -1044,6 +1138,92 @@
         }
         btn.innerHTML = "&#x21BB; Retry";
         btn.disabled = false;
+      }
+    }
+
+    async function triggerAgentSynthesis(cmd, output) {
+      if (isGenerating) return;
+      isGenerating = true;
+      document.getElementById('sendBtn').disabled = true;
+
+      // Truncate output safely for the model context
+      const truncated = output.length > 3000 ? output.slice(0, 3000) + "\n...[truncated remainder of graph output]..." : output;
+
+      const synthesisBubble = appendMessage('assistant', '<span class="cursor">&#x1F9E0; Jetson Agent synthesizing codebase insights...</span>');
+      const host = document.getElementById('jetsonHost').value.trim();
+
+      const synthesisPrompt = getSystemPrompt();
+      const followUpMessages = [
+        { role: "system", content: synthesisPrompt },
+        ...chatHistory,
+        {
+          role: "user",
+          content: `Here is the real-time execution output from [${cmd}]:\n\`\`\`\n${truncated}\n\`\`\`\n\nAnalyze this output thoroughly. Provide a direct, authoritative, and structured technical explanation answering the original question.`
+        }
+      ];
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Jetson-Host': host
+          },
+          body: JSON.stringify({
+            model: activeModel,
+            messages: followUpMessages,
+            stream: true,
+            options: { temperature: 0.1 }
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        synthesisBubble.innerHTML = '';
+        let fullResponse = '';
+        let streamBuffer = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          streamBuffer += decoder.decode(value, { stream: true });
+          const lines = streamBuffer.split('\n');
+          streamBuffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const json = JSON.parse(trimmed);
+              if (json.message && json.message.content) {
+                fullResponse += json.message.content;
+                synthesisBubble.innerHTML = formatMarkdown(fullResponse);
+                document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
+              }
+            } catch (e) {}
+          }
+        }
+
+        if (streamBuffer && streamBuffer.trim()) {
+          try {
+            const json = JSON.parse(streamBuffer.trim());
+            if (json.message && json.message.content) {
+              fullResponse += json.message.content;
+              synthesisBubble.innerHTML = formatMarkdown(fullResponse);
+            }
+          } catch (e) {}
+        }
+
+        if (fullResponse.trim()) {
+          chatHistory.push({ role: 'assistant', content: fullResponse });
+        }
+      } catch (err) {
+        synthesisBubble.innerHTML = `<span style="color: #ef4444;">&#x26A0; Synthesis Error: ${err.message}</span>`;
+      } finally {
+        isGenerating = false;
+        document.getElementById('sendBtn').disabled = false;
       }
     }
 
@@ -1085,6 +1265,40 @@
       return bubble;
     }
 
+    function getSystemPrompt() {
+      return `You are the Autonomous AI Software Engineer running on NVIDIA Jetson Orin Nano connected to a Windows host workstation.
+You have direct access to execute tools on the Windows PC and inspect code repositories.
+
+ACTIVE ENVIRONMENT & CODEBASE:
+- Primary Repository: Pilot-Futures (Android Java/Kotlin app for WTG wind turbine drone inspection missions).
+- Working Directory: C:\\Users\\topseven\\.codex\\worktrees\\299f\\Pilot-Futures
+- Code Knowledge Graph: Graft (@nanonets/graft) is indexed across 11,346 symbols and 33,287 relations.
+
+TOOLS YOU CAN USE:
+When you need to inspect, trace, search, run, or verify code, output a tool execution block in this exact format:
+\`\`\`tool
+{"tool": "execute_command", "command": "<command>"}
+\`\`\`
+
+RECOMMENDED GRAFT & GIT COMMANDS:
+1. To trace code logic, investigate questions, or find implementations:
+   {"tool": "execute_command", "command": "graft ask \\"<precise question>\\" --source --in app/"}
+2. To check blast radius / impacted symbols of a git commit or merge request:
+   {"tool": "execute_command", "command": "graft blast --base mr-935~2"}
+3. To search symbols, classes, or methods:
+   {"tool": "execute_command", "command": "graft search \\"<symbol>\\""}
+4. To check git history or diffs:
+   {"tool": "execute_command", "command": "git show <commit>"} or {"tool": "execute_command", "command": "git diff"}
+5. Windows PowerShell / GUI commands:
+   {"tool": "execute_command", "command": "powershell -Command ..."}
+
+CRITICAL RULES:
+1. For simple greetings, conversation, or math (e.g. "hi", "2+3"), DO NOT use tools. Reply naturally.
+2. When asked to trace, investigate, find, or analyze code in the project, ALWAYS invoke Graft or git commands rather than guessing or hallucinating git grep.
+3. Keep tool commands concise and correct.
+4. After you receive the tool output, synthesize a direct, authoritative, and actionable technical explanation.`;
+    }
+
     async function sendMessage() {
       const input = document.getElementById('promptInput');
       const text = input.value.trim();
@@ -1092,6 +1306,21 @@
 
       input.value = '';
       input.style.height = 'auto';
+
+      // Direct CLI command passthrough for graft, git, etc.
+      if (/^(graft|git|dir|ipconfig|powershell) /i.test(text)) {
+        appendMessage('user', text);
+        chatHistory.push({ role: 'user', content: text });
+        const cardHtml = buildToolCardHtml(text, 'execute_command');
+        const assistantBubble = appendMessage('assistant', cardHtml);
+        const btn = assistantBubble.querySelector('.tool-run-btn');
+        if (btn) {
+          await executeToolCommand(btn, text);
+        }
+        input.focus();
+        return;
+      }
+
       isGenerating = true;
       document.getElementById('sendBtn').disabled = true;
 
@@ -1099,53 +1328,9 @@
       chatHistory.push({ role: 'user', content: text });
 
       const assistantBubble = appendMessage('assistant', '<span class="cursor">Thinking...</span>');
-
       const toolsEnabled = document.getElementById('toolCallingToggle').checked;
       const host = document.getElementById('jetsonHost').value.trim();
-
-      const systemPrompt = `You are the AI Assistant for NVIDIA Jetson Orin Nano connected to a Windows host PC.
-You are equipped with autonomous execution tools on the Windows PC.
-
-MODES OF OPERATION:
-1. CONVERSATION & Q&A:
-   - For greetings, chit-chat, math questions, explanations, or code questions: reply with natural, helpful markdown.
-   - Do NOT invoke tools for simple questions like "hi", "2+3", or "explain quicksort".
-
-2. CODE GENERATION ONLY:
-   - When asked "write code" or "show me how to...", output standard markdown code blocks (e.g. \`\`\`python ... \`\`\`).
-
-3. TOOL EXECUTION (RUN / CREATE / LAUNCH / TEST):
-   - When the user asks to "run", "execute", "launch", "create a running app", "show a popup", "open", "test", or says "do it / run it":
-   - You MUST generate a tool call using the following exact block:
-\`\`\`tool
-{"tool": "execute_command", "command": "<command to execute in PowerShell or cmd>"}
-\`\`\`
-   - Provide a brief 1-sentence note to the user explaining what you are executing.
-
-EXAMPLES:
-User: hi
-Assistant: Hello! I am your Jetson Orin Nano AI assistant. How can I help you today?
-
-User: what is 2 + 3?
-Assistant: 2 + 3 is 5.
-
-User: create a running app that shows popup in windows heellloooo worlklld
-Assistant: Launching the popup window on your desktop now:
-\`\`\`tool
-{"tool": "execute_command", "command": "powershell -Command \\"Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('heellloooo worlklld', 'Jetson Orin Nano')\\""}
-\`\`\`
-
-User: run a python program that shows Hello baby popup
-Assistant: Running the Python popup on your Windows desktop:
-\`\`\`tool
-{"tool": "execute_command", "command": "python -c \\"import tkinter as tk, tkinter.messagebox as mb; root=tk.Tk(); root.withdraw(); mb.showinfo('Hello', 'Hello baby')\\""}
-\`\`\`
-
-User: check my ip address
-Assistant: Checking your IP configuration:
-\`\`\`tool
-{"tool": "execute_command", "command": "ipconfig"}
-\`\`\``;
+      const systemPrompt = getSystemPrompt();
 
       const payload = {
         model: activeModel,
@@ -1184,7 +1369,7 @@ Assistant: Checking your IP configuration:
 
           streamBuffer += decoder.decode(value, { stream: true });
           const lines = streamBuffer.split('\n');
-          streamBuffer = lines.pop(); // Keep unfinished partial line in buffer
+          streamBuffer = lines.pop();
 
           for (const line of lines) {
             const trimmed = line.trim();
@@ -1216,7 +1401,7 @@ Assistant: Checking your IP configuration:
         } else {
           chatHistory.push({ role: 'assistant', content: fullResponse });
           if (chatHistory.length > 8) {
-            chatHistory = chatHistory.slice(-8); // Prevent repetition memory loops
+            chatHistory = chatHistory.slice(-8);
           }
 
           // Autonomous Agent Execution: Auto-run any pending tool cards!
@@ -1251,6 +1436,6 @@ Assistant: Checking your IP configuration:
     // Check status on start and every 6 seconds
     checkStatus();
     setInterval(checkStatus, 6000);
-  </script>
+</script>
 </body>
 </html>

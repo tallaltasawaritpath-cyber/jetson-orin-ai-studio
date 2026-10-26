@@ -9,9 +9,13 @@ import sys
 import threading
 import time
 import subprocess
+import shlex
 
 PORT = 5050
 DEFAULT_JETSON_HOST = "192.168.151.108:11434"
+PILOT_REPO = r"C:\Users\topseven\.codex\worktrees\299f\Pilot-Futures"
+STUDIO_REPO = os.path.dirname(os.path.abspath(__file__))
+PILOT_GRAPH_PATH = r"C:\Users\topseven\Desktop\Pilot_Graft_Graph\index.html"
 
 class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -26,7 +30,7 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/graph' or self.path == '/graph/':
-            viz_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'viz_export', 'index.html')
+            viz_path = os.path.join(STUDIO_REPO, 'viz_export', 'index.html')
             if os.path.exists(viz_path):
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/html; charset=utf-8')
@@ -35,13 +39,47 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(f.read())
                 return
 
+        if self.path == '/pilot-graph' or self.path == '/pilot-graph/':
+            if os.path.exists(PILOT_GRAPH_PATH):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                with open(PILOT_GRAPH_PATH, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+
+        if self.path.startswith('/api/repos'):
+            repos = [
+                {
+                    "id": "pilot",
+                    "name": "Pilot-Futures (WTG Inspection)",
+                    "path": PILOT_REPO,
+                    "nodes": 11346,
+                    "edges": 33287,
+                    "graph_url": "/pilot-graph"
+                },
+                {
+                    "id": "studio",
+                    "name": "Jetson AI Studio",
+                    "path": STUDIO_REPO,
+                    "nodes": 4,
+                    "edges": 4,
+                    "graph_url": "/graph"
+                }
+            ]
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"repos": repos, "active": "pilot"}).encode('utf-8'))
+            return
+
         if self.path.startswith('/api/check_status'):
             host = self.headers.get('X-Jetson-Host', DEFAULT_JETSON_HOST)
             status_data = {"online": False, "models": [], "host": host}
             try:
                 url = f"http://{host}/api/tags"
                 req = urllib.request.Request(url, headers={'User-Agent': 'JetsonWebChat'})
-                with urllib.request.urlopen(req, timeout=1.5) as resp:
+                with urllib.request.urlopen(req, timeout=2.0) as resp:
                     if resp.status == 200:
                         data = json.loads(resp.read().decode('utf-8'))
                         status_data["online"] = True
@@ -58,15 +96,82 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
+        if self.path.startswith('/api/graft/ask'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+            query = body.get('query', '')
+            in_path = body.get('in_path', 'app/')
+            repo_path = body.get('repo', PILOT_REPO)
+            
+            cmd = f'graft ask "{query}" --source'
+            if in_path:
+                cmd.extend(['--in', in_path])
+            
+            try:
+                proc = subprocess.run(
+                    cmd, shell=True,
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=45.0
+                )
+                output = proc.stdout if proc.stdout else proc.stderr
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"output": output, "exit_code": proc.returncode}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        if self.path.startswith('/api/graft/blast'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length).decode('utf-8'))
+            base = body.get('base', 'mr-935~2')
+            repo_path = body.get('repo', PILOT_REPO)
+            
+            cmd = f'graft blast --base {base}'
+            try:
+                proc = subprocess.run(
+                    cmd, shell=True,
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=30.0
+                )
+                output = proc.stdout if proc.stdout else proc.stderr
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"output": output, "exit_code": proc.returncode}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         if self.path.startswith('/api/tools/execute'):
             content_length = int(self.headers.get('Content-Length', 0))
             body = json.loads(self.rfile.read(content_length).decode('utf-8'))
             cmd = body.get('command', '')
-            timeout = float(body.get('timeout', 3.5))
+            timeout = float(body.get('timeout', 30.0))
+            cwd = body.get('cwd', None)
+            
+            if not cwd:
+                if any(k in cmd for k in ['Pilot', 'app/', 'UploadTask', 'graft', 'gradle', 'Wtg2']):
+                    cwd = PILOT_REPO
+                else:
+                    cwd = STUDIO_REPO
+            
             try:
                 proc = subprocess.Popen(
                     cmd,
                     shell=True,
+                    cwd=cwd,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True
@@ -78,7 +183,6 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
                         out = f"(Process completed with exit code {proc.returncode})"
                     status = 200
                 except subprocess.TimeoutExpired:
-                    # GUI application or background process active
                     out = f"✓ Process active on Windows desktop (PID: {proc.pid}). Launched successfully."
                     status = 200
             except Exception as e:
@@ -88,7 +192,7 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(status)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"output": out}).encode('utf-8'))
+            self.wfile.write(json.dumps({"output": out, "cwd": cwd}).encode('utf-8'))
             return
 
         if self.path.startswith('/api/tools/write_file'):
@@ -149,10 +253,11 @@ def open_browser():
     webbrowser.open(f"http://localhost:{PORT}")
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(STUDIO_REPO)
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(("", PORT), JetsonProxyHandler) as httpd:
         print(f"[*] Jetson AI Web Chat server running on http://localhost:{PORT}")
+        print(f"[*] Pilot Knowledge Graph available at http://localhost:{PORT}/pilot-graph")
         threading.Thread(target=open_browser, daemon=True).start()
         try:
             httpd.serve_forever()
