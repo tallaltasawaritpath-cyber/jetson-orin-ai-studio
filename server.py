@@ -25,6 +25,16 @@ class JetsonProxyHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if self.path == '/graph' or self.path == '/graph/':
+            viz_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'viz_export', 'index.html')
+            if os.path.exists(viz_path):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                with open(viz_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+
         if self.path.startswith('/api/check_status'):
             host = self.headers.get('X-Jetson-Host', DEFAULT_JETSON_HOST)
             status_data = {"online": False, "models": [], "host": host}
