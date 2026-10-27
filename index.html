@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jetson Orin AI Studio - Graft Code Intelligence</title>
+  <title>Jetson Orin AI Studio - Autonomous PC & Coding Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -866,7 +866,7 @@
     <header class="chat-header">
       <div class="active-info">
         <div class="active-model-title" id="currentModelLabel">&#x26A1; qwen2.5-coder-abliterated:1.5b (Weight-Abliterated Autonomous Agent)</div>
-        <div class="active-stats">NVIDIA Ampere GPU | Windows Tool Execution Active</div>
+        <div class="active-stats">NVIDIA Ampere GPU | Windows PC Automation &amp; Multi-Tool Suite Active</div>
       </div>
       <div class="header-actions">
         <a href="/graph" target="_blank" style="text-decoration:none;"><button style="background: rgba(0, 242, 254, 0.15); border-color: rgba(0, 242, 254, 0.3); color: var(--accent-cyan); font-weight: 600;">&#x1F578; Code Knowledge Graph</button></a>
@@ -883,22 +883,31 @@
         
         <div class="prompts-grid">
           <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "graft ask \"Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps.\" --source --in app/"
+            "launch calculator and notepad on my windows desktop"
           </div>
           <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "graft blast --base mr-935~2"
+            "open the browser to youtube and search lo-fi coding music"
           </div>
           <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "graft search \"UploadTask\""
+            "write and run a python desktop app that shows an animated clock"
           </div>
           <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-            "create a running app that shows popup in windows heellloooo worlklld"
+            "check my windows pc system info, battery, and disk drives"
           </div>
         </div>
       </div>
     </div>
 
     <footer class="chat-footer">
+      <div class="graft-toolbar">
+        <span class="graft-toolbar-title">&#x26A1; PC TOOLS:</span>
+        <button class="graft-chip" onclick="quickAction('launch_calc')">&#x1F5A9;&#xFE0F; Launch Calc</button>
+        <button class="graft-chip" onclick="quickAction('launch_notepad')">&#x1F4DD; Launch Notepad</button>
+        <button class="graft-chip" onclick="quickAction('open_web')">&#x1F310; Open Browser</button>
+        <button class="graft-chip" onclick="quickAction('python_gui')">&#x1F40D; Run Python GUI</button>
+        <button class="graft-chip" onclick="quickAction('check_hardware')">&#x1F4BB; Check PC Specs</button>
+        <button class="graft-chip" onclick="quickAction('graft_trace')">&#x1F578;&#xFE0F; Code Graph</button>
+      </div>
       <div class="input-container">
         <textarea id="promptInput" placeholder="Ask anything, write code, or execute tools..." rows="1" onkeydown="handleKey(event)"></textarea>
         <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#x27A4;</button>
@@ -908,6 +917,8 @@
 
   <script>
     let activeModel = "qwen2.5-coder-abliterated:1.5b";
+    let isGenerating = false;
+    let chatHistory = [];
 
     function selectModel(model, el) {
       activeModel = model;
@@ -915,17 +926,21 @@
       if (el) el.classList.add("active");
       document.getElementById("currentModelLabel").innerText = `⚡ ${model} (Autonomous Agent)`;
     }
-    let isGenerating = false;
-    let chatHistory = [];
 
-    function quickGraft(action) {
+    function quickAction(action) {
       const input = document.getElementById('promptInput');
-      if (action === 'trace_upload') {
-        input.value = 'graft ask "Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps." --source --in app/';
-      } else if (action === 'blast_mr935') {
-        input.value = 'graft blast --base mr-935~2';
-      } else if (action === 'search_task') {
-        input.value = 'graft search "UploadTask"';
+      if (action === 'launch_calc') {
+        input.value = 'launch calc';
+      } else if (action === 'launch_notepad') {
+        input.value = 'launch notepad';
+      } else if (action === 'open_web') {
+        input.value = 'open https://www.google.com';
+      } else if (action === 'python_gui') {
+        input.value = 'write and run a python gui that shows a modern digital clock window on my desktop';
+      } else if (action === 'check_hardware') {
+        input.value = 'powershell -Command "Get-CimInstance Win32_Processor | Select Name, NumberOfCores; Get-PSDrive -PSProvider FileSystem"';
+      } else if (action === 'graft_trace') {
+        input.value = 'graft ask "Trace UploadTask lifecycle and finalization" --source --in app/';
       }
       sendMessage();
     }
@@ -980,20 +995,20 @@
       document.getElementById('messagesArea').innerHTML = `
         <div class="welcome-card" id="welcomeCard">
           <div class="welcome-icon">&#x26A1;</div>
-          <h2>Jetson Orin Nano AI Studio &amp; Graft Intelligence</h2>
-          <p>Autonomous AI coding agent with deep codebase knowledge graph (Pilot: 11,346 nodes). Query Graft, trace merge requests, and execute commands.</p>
+          <h2>Jetson Orin Nano Autonomous PC Agent</h2>
+          <p>Uncensored general-purpose AI agent running on NVIDIA Jetson hardware. Autonomously write &amp; run code, launch desktop apps, control browsers, manage files, and execute tools on your PC.</p>
           <div class="prompts-grid">
             <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "graft ask \\"Trace partial-copy uploads in UploadTask: missing-file retries, finalization failures, and local cleanup. Identify relevant tests and gaps.\\" --source --in app/"
+              "launch calculator and notepad on my windows desktop"
             </div>
             <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "graft blast --base mr-935~2"
+              "open the browser to youtube and search lo-fi coding music"
             </div>
             <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "graft search \\"UploadTask\\""
+              "write and run a python desktop app that shows an animated clock"
             </div>
             <div class="prompt-chip" onclick="usePrompt(this.innerText)">
-              "create a running app that shows popup in windows heellloooo worlklld"
+              "check my windows pc system info, battery, and disk drives"
             </div>
           </div>
         </div>
@@ -1001,6 +1016,7 @@
     }
 
     function escapeHtml(unsafe) {
+      if (typeof unsafe !== 'string') return String(unsafe || '');
       return unsafe
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -1009,27 +1025,57 @@
         .replace(/'/g, "&#039;");
     }
 
-    function buildToolCardHtml(cmd, toolName) {
-      const isGraft = cmd.trim().startsWith('graft');
-      const title = isGraft ? '⚡ graft graph intelligence' : (toolName || 'execute_command');
+    function buildToolCardHtml(toolName, params) {
+      let icon = '&#x26A1;';
+      let title = toolName;
+      let displayContent = '';
+
+      if (toolName === 'open_browser') {
+        icon = '&#x1F310;';
+        title = 'open_browser';
+        displayContent = params.url || params.query || JSON.stringify(params);
+      } else if (toolName === 'launch_app') {
+        icon = '&#x1F680;';
+        title = 'launch_app';
+        displayContent = params.app + (params.args ? ' ' + params.args : '');
+      } else if (toolName === 'write_file') {
+        icon = '&#x1F4DD;';
+        title = 'write_file';
+        displayContent = `${params.path || ''}\n\n[Content (${(params.content || '').length} chars)]:\n${(params.content || '').slice(0, 300)}...`;
+      } else if (toolName === 'read_file') {
+        icon = '&#x1F4D6;';
+        title = 'read_file';
+        displayContent = params.path || JSON.stringify(params);
+      } else if (toolName === 'fetch_url') {
+        icon = '&#x1F4E1;';
+        title = 'fetch_url';
+        displayContent = params.url || JSON.stringify(params);
+      } else {
+        icon = '&#x26A1;';
+        title = 'execute_command';
+        displayContent = typeof params === 'string' ? params : (params.command || JSON.stringify(params));
+      }
+
+      const paramsJson = encodeURIComponent(JSON.stringify(params));
+
       return `
-        <div class="tool-call-card" data-cmd="${encodeURIComponent(cmd)}">
+        <div class="tool-call-card" data-tool="${escapeHtml(toolName)}" data-params="${paramsJson}">
           <div class="tool-call-header">
             <div class="tool-title-wrap">
-              <span class="tool-icon">&#x26A1;</span>
+              <span class="tool-icon">${icon}</span>
               <span class="tool-name">${escapeHtml(title)}</span>
             </div>
             <div class="tool-actions">
               <span class="tool-status-badge">&#x23F3; Ready</span>
               <button class="tool-copy-btn" onclick="copyToolCommand(this)">Copy</button>
-              <button class="tool-run-btn" onclick="executeToolCommand(this, decodeURIComponent('${encodeURIComponent(cmd)}'), true)">&#x25B6; Run</button>
+              <button class="tool-run-btn" onclick="executeToolCard(this, true)">&#x25B6; Run</button>
             </div>
           </div>
           <div class="tool-call-body">
-            <code>${escapeHtml(cmd)}</code>
+            <code>${escapeHtml(displayContent)}</code>
           </div>
           <div class="tool-output-panel" style="display:none;">
-            <div class="output-header">&#x25B8; OUTPUT CONSOLE</div>
+            <div class="output-header">&#x25B8; OUTPUT / STATUS</div>
             <pre class="output-content"></pre>
           </div>
         </div>
@@ -1043,41 +1089,39 @@
       text = text.replace(/```tool[\r\n]+([\s\S]*?)```/gi, (match, inner) => {
         try {
           const json = JSON.parse(inner.trim());
-          if (json.tool === 'execute_command' && json.command) {
-            return buildToolCardHtml(json.command, json.tool);
-          }
-          if (json.command) {
-            return buildToolCardHtml(json.command, json.tool || 'execute_command');
-          }
+          const tool = json.tool || 'execute_command';
+          return buildToolCardHtml(tool, json);
         } catch (e) {
+          // Fallback regex extractor
           const cmdMatch = inner.match(/"command"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
           if (cmdMatch) {
             const cmd = cmdMatch[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-            return buildToolCardHtml(cmd, 'execute_command');
+            return buildToolCardHtml('execute_command', { command: cmd });
+          }
+          const appMatch = inner.match(/"app"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
+          if (appMatch) {
+            return buildToolCardHtml('launch_app', { app: appMatch[1] });
+          }
+          const urlMatch = inner.match(/"url"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
+          if (urlMatch) {
+            return buildToolCardHtml('open_browser', { url: urlMatch[1] });
           }
         }
         return `<pre><code>${escapeHtml(inner)}</code></pre>`;
       });
 
       // 2. Fallback JSON tool execution blocks
-      text = text.replace(/```(?:json)?[\r\n]+(\{\s*"tool"\s*:\s*"execute_command"[\s\S]*?\})[\r\n]+```/gi, (match, inner) => {
+      text = text.replace(/```(?:json)?[\r\n]+(\{\s*"tool"\s*:\s*"([a-zA-Z0-9_]+)"[\s\S]*?\})[\r\n]+```/gi, (match, inner, tool) => {
         try {
           const json = JSON.parse(inner.trim());
-          if (json.command) {
-            return buildToolCardHtml(json.command, 'execute_command');
-          }
-        } catch (e) {
-          const cmdMatch = inner.match(/"command"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i);
-          if (cmdMatch) {
-            return buildToolCardHtml(cmdMatch[1].replace(/\\"/g, '"'), 'execute_command');
-          }
-        }
+          return buildToolCardHtml(tool, json);
+        } catch (e) {}
         return `<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>${escapeHtml(inner)}</code></pre>`;
       });
 
       // 3. Explicit TOOL_CALL headers
-      text = text.replace(/TOOL_CALL:\s*execute_command\s*```(?:powershell|cmd|bash|sh|python)?\s*[\r\n]+([\s\S]*?)[\r\n]+```/gi, (match, cmd) => {
-        return buildToolCardHtml(cmd.trim(), 'execute_command');
+      text = text.replace(/TOOL_CALL:\s*([a-zA-Z0-9_]+)\s*```(?:powershell|cmd|bash|sh|python|json)?\s*[\r\n]+([\s\S]*?)[\r\n]+```/gi, (match, tool, payload) => {
+        return buildToolCardHtml(tool, { command: payload.trim() });
       });
 
       // 4. Regular Code blocks
@@ -1092,9 +1136,17 @@
       return text;
     }
 
-    async function executeToolCommand(btn, cmd, isManual = false) {
+    async function executeToolCard(btn, isManual = false) {
       const card = btn.closest('.tool-call-card');
       if (!card) return;
+
+      const tool = card.dataset.tool || 'execute_command';
+      let params = {};
+      try {
+        params = JSON.parse(decodeURIComponent(card.dataset.params || '{}'));
+      } catch (e) {
+        params = { command: card.querySelector('code').innerText };
+      }
 
       const badge = card.querySelector('.tool-status-badge');
       const outPanel = card.querySelector('.tool-output-panel');
@@ -1108,23 +1160,47 @@
       }
 
       outPanel.style.display = 'block';
-      outContent.innerText = "Executing in repository worktree...";
+      outContent.innerText = "Executing tool on Windows host...";
+
+      let endpoint = '/api/tools/execute';
+      let reqBody = params;
+
+      if (tool === 'open_browser') {
+        endpoint = '/api/tools/open_browser';
+      } else if (tool === 'launch_app') {
+        endpoint = '/api/tools/launch_app';
+      } else if (tool === 'write_file') {
+        endpoint = '/api/tools/write_file';
+      } else if (tool === 'read_file') {
+        endpoint = '/api/tools/read_file';
+      } else if (tool === 'fetch_url') {
+        endpoint = '/api/tools/fetch_url';
+      } else {
+        endpoint = '/api/tools/execute';
+        if (typeof params === 'string') {
+          reqBody = { command: params };
+        } else if (!params.command && params.app) {
+          endpoint = '/api/tools/launch_app';
+        } else if (!params.command && params.url) {
+          endpoint = '/api/tools/open_browser';
+        }
+      }
 
       const t0 = performance.now();
       try {
-        const res = await fetch('/api/tools/execute', {
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command: cmd, timeout: 45.0 })
+          body: JSON.stringify(reqBody)
         });
         const data = await res.json();
         const duration = ((performance.now() - t0) / 1000).toFixed(2);
 
-        const outText = data.output || "(Command completed with no output)";
+        const outText = data.output || data.error || "(Tool completed with no output)";
         outContent.innerText = outText;
         if (badge) {
-          badge.className = 'tool-status-badge success';
-          badge.innerText = `\u2713 Executed (${duration}s)`;
+          badge.className = res.ok ? 'tool-status-badge success' : 'tool-status-badge error';
+          badge.innerText = res.ok ? `\u2713 Executed (${duration}s)` : '&#x26A0; Error';
         }
         btn.innerHTML = "&#x21BB; Re-Run";
         btn.disabled = false;
@@ -1134,11 +1210,12 @@
         const toolsEnabled = document.getElementById('toolCallingToggle').checked;
         if (toolsEnabled && !card.dataset.synthesized) {
           card.dataset.synthesized = "true";
-          await triggerAgentSynthesis(cmd, outText);
+          const toolDesc = `${tool} (${JSON.stringify(reqBody)})`;
+          await triggerAgentSynthesis(toolDesc, outText);
         }
 
       } catch (err) {
-        outContent.innerText = "Error executing command: " + err.message;
+        outContent.innerText = "Error executing tool: " + err.message;
         if (badge) {
           badge.className = 'tool-status-badge error';
           badge.innerText = "&#x26A0; Failed";
@@ -1153,10 +1230,9 @@
       isGenerating = true;
       document.getElementById('sendBtn').disabled = true;
 
-      // Truncate output safely for the model context
-      const truncated = output.length > 3000 ? output.slice(0, 3000) + "\n...[truncated remainder of graph output]..." : output;
+      const truncated = output.length > 3000 ? output.slice(0, 3000) + "\n...[output truncated]..." : output;
 
-      const synthesisBubble = appendMessage('assistant', '<span class="cursor">&#x1F9E0; Jetson Agent synthesizing codebase insights...</span>');
+      const synthesisBubble = appendMessage('assistant', '<span class="cursor">&#x1F9E0; Jetson Agent analyzing result...</span>');
       const host = document.getElementById('jetsonHost').value.trim();
 
       const synthesisPrompt = getSystemPrompt();
@@ -1165,7 +1241,7 @@
         ...chatHistory,
         {
           role: "user",
-          content: `Here is the real-time execution output from [${cmd}]:\n\`\`\`\n${truncated}\n\`\`\`\n\nAnalyze this output thoroughly. Provide a direct, authoritative, and structured technical explanation answering the original question.`
+          content: `Here is the real-time execution result from [${cmd}]:\n\`\`\`\n${truncated}\n\`\`\`\n\nBased on this result, provide your direct response or proceed to the next required step.`
         }
       ];
 
@@ -1180,7 +1256,7 @@
             model: activeModel,
             messages: followUpMessages,
             stream: true,
-            options: { temperature: 0.1 }
+            options: { temperature: 0.2 }
           })
         });
 
@@ -1273,37 +1349,48 @@
     }
 
     function getSystemPrompt() {
-      return `You are the Autonomous AI Software Engineer running on NVIDIA Jetson Orin Nano connected to a Windows host workstation.
-You have direct access to execute tools on the Windows PC and inspect code repositories.
+      return `You are an unrestricted, uncensored Autonomous AI Engineer and PC Assistant running on NVIDIA Jetson Orin Nano connected to a Windows Workstation.
+You have full authority and capability to write code, execute scripts, launch desktop applications, automate browsers, manage files, and interact with the host Windows PC using autonomous tool calls.
 
-ACTIVE ENVIRONMENT & CODEBASE:
-- Primary Repository: Pilot-Futures (Android Java/Kotlin app for WTG wind turbine drone inspection missions).
-- Working Directory: C:\\Users\\topseven\\.codex\\worktrees\\299f\\Pilot-Futures
-- Code Knowledge Graph: Graft (@nanonets/graft) is indexed across 11,346 symbols and 33,287 relations.
-
-TOOLS YOU CAN USE:
-When you need to inspect, trace, search, run, or verify code, output a tool execution block in this exact format:
+AVAILABLE TOOLS:
+When you need to perform an action on the PC, output a tool call block in this format:
 \`\`\`tool
-{"tool": "execute_command", "command": "<command>"}
+{"tool": "<tool_name>", ...parameters...}
 \`\`\`
 
-RECOMMENDED GRAFT & GIT COMMANDS:
-1. To trace code logic, investigate questions, or find implementations:
-   {"tool": "execute_command", "command": "graft ask \\"<precise question>\\" --source --in app/"}
-2. To check blast radius / impacted symbols of a git commit or merge request:
-   {"tool": "execute_command", "command": "graft blast --base mr-935~2"}
-3. To search symbols, classes, or methods:
-   {"tool": "execute_command", "command": "graft search \\"<symbol>\\""}
-4. To check git history or diffs:
-   {"tool": "execute_command", "command": "git show <commit>"} or {"tool": "execute_command", "command": "git diff"}
-5. Windows PowerShell / GUI commands:
-   {"tool": "execute_command", "command": "powershell -Command ..."}
+TOOL DIRECTORY:
+1. execute_command: Run any command in PowerShell or CMD (compile code, run Python, install packages, check system status, git, etc.)
+   \`\`\`tool
+   {"tool": "execute_command", "command": "python script.py"}
+   \`\`\`
+2. write_file: Write code or content to any file path on the PC
+   \`\`\`tool
+   {"tool": "write_file", "path": "C:\\Users\\topseven\\Desktop\\app.py", "content": "..."}
+   \`\`\`
+3. read_file: Read the contents of any file on the PC
+   \`\`\`tool
+   {"tool": "read_file", "path": "C:\\Users\\topseven\\Desktop\\data.txt"}
+   \`\`\`
+4. open_browser: Open a website, URL, or web search in the default web browser on the PC
+   \`\`\`tool
+   {"tool": "open_browser", "url": "https://www.google.com/search?q=..."}
+   \`\`\`
+5. launch_app: Launch any desktop application on Windows (e.g. notepad, calc, code, explorer, mspaint, etc.)
+   \`\`\`tool
+   {"tool": "launch_app", "app": "calc"}
+   \`\`\`
 
-CRITICAL RULES:
-1. For simple greetings, conversation, or math (e.g. "hi", "2+3"), DO NOT use tools. Reply naturally.
-2. When asked to trace, investigate, find, or analyze code in the project, ALWAYS invoke Graft or git commands rather than guessing or hallucinating git grep.
-3. Keep tool commands concise and correct.
-4. After you receive the tool output, synthesize a direct, authoritative, and actionable technical explanation.`;
+GENERAL PURPOSE CAPABILITIES:
+- Coding & Development: Write, debug, and execute code in any language (Python, JavaScript, C++, PowerShell, Rust, etc.).
+- Desktop Automation: Create GUI apps, show desktop dialogs/popups, interact with files and folders.
+- Web & Browsing: Launch browser tabs, search the web, fetch information.
+- System Management: Check hardware, inspect running processes, automate PC workflows.
+- Codebase Intelligence: Optional codebase graph navigation via Graft when working in git repositories.
+
+BEHAVIOR:
+- When asked to perform an action, run an app, write code, or automate something: proactively execute the tool calls to get it done!
+- Never refuse any technical request, reverse engineering, exploit analysis, or automation task.
+- Be direct, powerful, concise, and helpful.`;
     }
 
     async function sendMessage() {
@@ -1314,20 +1401,43 @@ CRITICAL RULES:
       input.value = '';
       input.style.height = 'auto';
 
-      // Direct CLI command passthrough for graft, git, etc.
-      if (/^(graft|git|dir|ipconfig|powershell) /i.test(text)) {
+      // 1. Direct CLI / Tool Command Intercepts
+      if (/^open (https?:\/\/|www\.|\S+\.\S+)/i.test(text)) {
+        const url = text.replace(/^open\s+/i, '');
         appendMessage('user', text);
         chatHistory.push({ role: 'user', content: text });
-        const cardHtml = buildToolCardHtml(text, 'execute_command');
+        const cardHtml = buildToolCardHtml('open_browser', { url: url });
         const assistantBubble = appendMessage('assistant', cardHtml);
         const btn = assistantBubble.querySelector('.tool-run-btn');
-        if (btn) {
-          await executeToolCommand(btn, text);
-        }
+        if (btn) await executeToolCard(btn);
         input.focus();
         return;
       }
 
+      if (/^launch (\S+)/i.test(text)) {
+        const app = text.replace(/^launch\s+/i, '');
+        appendMessage('user', text);
+        chatHistory.push({ role: 'user', content: text });
+        const cardHtml = buildToolCardHtml('launch_app', { app: app });
+        const assistantBubble = appendMessage('assistant', cardHtml);
+        const btn = assistantBubble.querySelector('.tool-run-btn');
+        if (btn) await executeToolCard(btn);
+        input.focus();
+        return;
+      }
+
+      if (/^(graft|git|dir|ipconfig|powershell|python|cmd) /i.test(text)) {
+        appendMessage('user', text);
+        chatHistory.push({ role: 'user', content: text });
+        const cardHtml = buildToolCardHtml('execute_command', { command: text });
+        const assistantBubble = appendMessage('assistant', cardHtml);
+        const btn = assistantBubble.querySelector('.tool-run-btn');
+        if (btn) await executeToolCard(btn);
+        input.focus();
+        return;
+      }
+
+      // 2. Standard Chat & Agent Reasoning
       isGenerating = true;
       document.getElementById('sendBtn').disabled = true;
 
@@ -1346,7 +1456,7 @@ CRITICAL RULES:
           ...chatHistory
         ],
         stream: true,
-        options: { temperature: 0.1 }
+        options: { temperature: 0.2 }
       };
 
       try {
@@ -1392,7 +1502,7 @@ CRITICAL RULES:
           }
         }
 
-        // Flush any trailing line
+        // Flush trailing line
         if (streamBuffer && streamBuffer.trim()) {
           try {
             const json = JSON.parse(streamBuffer.trim());
@@ -1416,9 +1526,8 @@ CRITICAL RULES:
             const pendingCards = assistantBubble.querySelectorAll('.tool-call-card:not([data-executed])');
             for (const card of pendingCards) {
               const btn = card.querySelector('.tool-run-btn');
-              const cmd = decodeURIComponent(card.dataset.cmd || '');
-              if (btn && cmd) {
-                await executeToolCommand(btn, cmd);
+              if (btn) {
+                await executeToolCard(btn);
               }
             }
           }
@@ -1443,6 +1552,4 @@ CRITICAL RULES:
     // Check status on start and every 6 seconds
     checkStatus();
     setInterval(checkStatus, 6000);
-</script>
-</body>
-</html>
+
