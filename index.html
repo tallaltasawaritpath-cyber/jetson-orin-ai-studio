@@ -818,12 +818,19 @@
     <!-- Models -->
     <div class="section-label">Active Model</div>
     <div class="model-selector">
-      <div class="model-option active" data-model="qwen-coder-uncensored:1.5b" onclick="selectModel('qwen-coder-uncensored:1.5b', this)">
+      <div class="model-option active" data-model="qwen2.5-coder-abliterated:1.5b" onclick="selectModel('qwen2.5-coder-abliterated:1.5b', this)">
         <div class="model-name">
-          <span>Qwen Coder Uncensored 1.5B</span>
-          <span class="model-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">&#x26A1; Uncensored</span>
+          <span>Qwen Coder Abliterated 1.5B</span>
+          <span class="model-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">&#x1F525; Weight-Abliterated</span>
         </div>
-        <div class="model-desc">Uncensored, zero-refusal coding intelligence on Orin Nano with full Graft tool calling.</div>
+        <div class="model-desc">Genuine mathematical weight-level abliteration (refusal direction vectors removed). Zero refusals.</div>
+      </div>
+      <div class="model-option" data-model="qwen-coder-uncensored:1.5b" onclick="selectModel('qwen-coder-uncensored:1.5b', this)">
+        <div class="model-name">
+          <span>Qwen Coder Fast 1.5B</span>
+          <span class="model-badge">Prompt Unlocked</span>
+        </div>
+        <div class="model-desc">System prompt unlocked coding assistant on Orin Nano.</div>
       </div>
       <div class="model-option" data-model="qwen2.5-coder:1.5b" onclick="selectModel('qwen2.5-coder:1.5b', this)">
         <div class="model-name">
@@ -858,7 +865,7 @@
   <main class="chat-container">
     <header class="chat-header">
       <div class="active-info">
-        <div class="active-model-title" id="currentModelLabel">&#x26A1; qwen-coder-uncensored:1.5b (Autonomous Agent)</div>
+        <div class="active-model-title" id="currentModelLabel">&#x26A1; qwen2.5-coder-abliterated:1.5b (Weight-Abliterated Autonomous Agent)</div>
         <div class="active-stats">NVIDIA Ampere GPU | Windows Tool Execution Active</div>
       </div>
       <div class="header-actions">
@@ -900,7 +907,7 @@
   </main>
 
   <script>
-    let activeModel = "qwen-coder-uncensored:1.5b";
+    let activeModel = "qwen2.5-coder-abliterated:1.5b";
 
     function selectModel(model, el) {
       activeModel = model;
