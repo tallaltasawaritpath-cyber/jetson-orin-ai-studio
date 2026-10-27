@@ -198,8 +198,19 @@ class GeneralPurposeAgentHandler(http.server.SimpleHTTPRequestHandler):
         if self.path.startswith('/api/tools/launch_app'):
             content_length = int(self.headers.get('Content-Length', 0))
             body = json.loads(self.rfile.read(content_length).decode('utf-8'))
-            app = body.get('app', '').strip()
+            app = (body.get('app') or body.get('app_name') or body.get('name') or '').strip()
             args = body.get('args', '').strip()
+            
+            # Common Windows aliases
+            app_lower = app.lower()
+            if app_lower in ('calculator', 'calc.exe'):
+                app = 'calc'
+            elif app_lower in ('vscode', 'visual studio code'):
+                app = 'code'
+            elif app_lower in ('files', 'file explorer'):
+                app = 'explorer'
+            elif app_lower in ('paint', 'paint.exe'):
+                app = 'mspaint'
             
             cmd = f'start "" "{app}" {args}'.strip()
             try:
@@ -355,13 +366,21 @@ class GeneralPurposeAgentHandler(http.server.SimpleHTTPRequestHandler):
                         chunk = resp.read(1024)
                         if not chunk:
                             break
-                        self.wfile.write(chunk)
-                        self.wfile.flush()
+                        try:
+                            self.wfile.write(chunk)
+                            self.wfile.flush()
+                        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                            break
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                return
             except Exception as e:
-                self.send_response(502)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": f"Failed to connect to Jetson at {host}: {e}"}).encode('utf-8'))
+                try:
+                    self.send_response(502)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": f"Failed to connect to Jetson at {host}: {e}"}).encode('utf-8'))
+                except Exception:
+                    pass
             return
 
         self.send_response(404)
