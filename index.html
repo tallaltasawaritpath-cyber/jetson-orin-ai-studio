@@ -958,12 +958,23 @@
     }
 
     async function checkStatus() {
+      let host = document.getElementById('jetsonHost').value.trim();
       const savedHost = localStorage.getItem('jetsonHost');
       if (savedHost && !document.getElementById('jetsonHost').dataset.init) {
-        document.getElementById('jetsonHost').value = savedHost;
+        // If savedHost was an old dead USB IP like 192.168.55.1, reset to 192.168.151.108:11434
+        if (savedHost.startsWith('192.168.55.')) {
+          host = '192.168.151.108:11434';
+          localStorage.setItem('jetsonHost', host);
+        } else {
+          host = savedHost;
+        }
+        document.getElementById('jetsonHost').value = host;
         document.getElementById('jetsonHost').dataset.init = "true";
       }
-      const host = document.getElementById('jetsonHost').value.trim();
+      if (!host) {
+        host = '192.168.151.108:11434';
+        document.getElementById('jetsonHost').value = host;
+      }
       localStorage.setItem('jetsonHost', host);
 
       const badge = document.getElementById('statusBadge');
@@ -1581,4 +1592,6 @@ CRITICAL BEHAVIOR & GUIDELINES:
     // Check status on start and every 6 seconds
     checkStatus();
     setInterval(checkStatus, 6000);
-
+  </script>
+</body>
+</html>
